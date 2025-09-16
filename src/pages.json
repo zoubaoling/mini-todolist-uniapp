@@ -1,0 +1,63 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/home/home",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"usingComponents": {}
+			}
+		},
+		{
+			"path": "pages/stats/stats",
+			"style": {
+				"usingComponents": {}
+			}
+		},
+		{
+			"path": "pages/profile/profile",
+			"style": {
+				"usingComponents": {}
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationStyle": "custom",
+		"usingComponents": {
+			"t-swipe-cell": "tdesign-miniprogram/swipe-cell/swipe-cell",
+			"t-button": "tdesign-miniprogram/button/button",
+			"t-input": "tdesign-miniprogram/input/input",
+			"t-toast": "tdesign-miniprogram/toast/toast"
+		}
+	},
+	"tabBar": {
+		"color": "#999",
+		"selectedColor": "#000",
+		"backgroundColor": "#F8F8F8",
+		"list": [
+			{
+				"text": "首页",
+				"pagePath": "pages/home/home"
+			},
+			{
+				"text": "统计",
+				"pagePath": "pages/stats/stats"
+			},
+			{
+				"text": "我的",
+				"pagePath": "pages/profile/profile"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	}
+}
