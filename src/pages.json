@@ -10,7 +10,8 @@
 			"path": "pages/home/home",
 			"style": {
 				"navigationBarTitleText": "首页",
-				"usingComponents": {}
+				"usingComponents": {
+    }
 			}
 		},
 		{
@@ -24,15 +25,16 @@
 			"style": {
 				"usingComponents": {}
 			}
+		},
+		{
+			"path": "pages/add-task/add-task"
 		}
 	],
 	"globalStyle": {
 		"navigationStyle": "custom",
 		"usingComponents": {
-			"t-swipe-cell": "tdesign-miniprogram/swipe-cell/swipe-cell",
-			"t-button": "tdesign-miniprogram/button/button",
-			"t-input": "tdesign-miniprogram/input/input",
-			"t-toast": "tdesign-miniprogram/toast/toast"
+			"t-button": "/miniprogram_npm/tdesign-miniprogram/button/button",
+			"t-swipe-cell": "/miniprogram_npm/tdesign-miniprogram/swipe-cell/swipe-cell"
 		}
 	},
 	"tabBar": {
@@ -53,11 +55,5 @@
 				"pagePath": "pages/profile/profile"
 			}
 		]
-	},
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
 	}
 }

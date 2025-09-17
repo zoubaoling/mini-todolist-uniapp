@@ -21,9 +21,9 @@
             class="search-input"
             placeholder="搜索任务..."
             placeholder-class="search-input__placeholder"
-            :value="searchTaskValue"
-            bind:confirm="handleSearchTask"
-            bind:input="debounceSearchTask"
+            v-model.trim="searchTaskValue"
+            @confirm="handleSearchTask"
+            @input="debounceSearchTask"
             confirm-type="search"
           />
           <!-- 清除按钮 -->
@@ -40,8 +40,7 @@
           <view
             v-for="item in searchTaskTabs"
             :key="item.type"
-            @click="handleSearchTabTap"
-            :data-type="item.type"
+            @click="handleSearchTabTap(item)"
             class="search-tab"
             :class="{ 'search-tab-active': selectedSearchTaskTab === item.type }"
             >
@@ -49,27 +48,23 @@
           </view>
         </view>
       </view>
-      <!-- 过滤任务列表 -->
-      <scroll-view 
+        <scroll-view 
         class="task-list"
         scroll-y
         enhanced
-        show-scrollbar="{{true}}"
-        refresher-enabled="{{true}}"
-        bindscroll="handleScroll"
+        :show-scrollbar="true"
+        :refresher-enabled="true"
+        @scroll="handleScroll"
         >
         <!-- 任务列表 -->
         <template v-for="item in taskList" :key="item._id" v-if="taskList.length > 0">
           <t-swipe-cell
-            :id="item._id"
+            catch:touchmove="noop"
             >
             <view
               class="task-item"
               :class="item.itemClass"
-              @click="navigateToTaskDetail"
-              :data-id="item._id"
-              :data-status="item.status"
-              :data-is-editable="item.isEditable"
+              @click="navigateToTaskDetail(item)"
               >
               <view class="task-header">
                 <!-- todo: 任务完成后，划线灰质禁止操作 -->
@@ -80,10 +75,7 @@
                       color="#667eea"
                       :value="item.id"
                       :checked="item.status === 'COMPLETED'"
-                      @click="handleTaskStatusChange"
-                      :data-id="item._id"
-                      :data-status="item.status"
-                      :data-is-editable="item.isEditable"
+                      @click="handleTaskStatusChange(item)"
                     />
                     <text class="radio-item-text" :class="[item.textClass]">{{item.text}}</text>
                   </label>
@@ -100,10 +92,10 @@
               </view>
             </view>
             <view slot="right" class="right-slot">
-              <view v-if="item.isEditable" class="btn edit-btn column" :data-id="item._id" @click="onSwipeCellEditClick">
+              <view v-if="item.isEditable" class="btn edit-btn column" @click="onSwipeCellEditClick(item._id)">
                 编辑
               </view>
-              <view class="btn delete-btn column" :data-id="item._id" @click="onSwipeCellDeleteClick">
+              <view class="btn delete-btn column" @click="onSwipeCellDeleteClick(item._id)">
                 删除
               </view>
             </view>
@@ -140,6 +132,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
+import { onShow } from '@dcloudio/uni-app'
 import NavigatorBar from '@/components/navigator-bar/navigatorBar.vue';
 import { TASK_CATEGORY, TASK_MAPS,  } from '../../constants/index'
 import { TaskStatus, TaskPriority, TaskItem } from '../../types/index'
@@ -147,11 +140,11 @@ import { debounce, formatToPercentage, showModal } from '../../utils/util'
 import TimeUtils from '../../utils/timer'
 import * as serverApi from '../../server/index'
 
-const taskCategory = ref(TASK_CATEGORY)
 const overviewData = reactive([])
 const searchTaskValue = ref('')
 const selectedSearchTaskTab = ref('ALL')
 const taskList = reactive([])
+
 
 const getOverviewData = async () => {
   const res = await serverApi.getTaskOverview()
@@ -212,8 +205,8 @@ const searchTaskTabs = computed(() => {
     ...Object.values(TASK_CATEGORY).map(({type, label}) => ({type, label}))
   ]
 })
-const handleSearchTabTap = (e: any) => {
-  const { type } = e.currentTarget.dataset
+const handleSearchTabTap = (item) => {
+  const { type } = item
   selectedSearchTaskTab.value = type
   getTaskList({ category: type })
 }
@@ -222,8 +215,8 @@ const handleSearchTask = () => {
   getTaskList({ search: searchTaskValue.value })
 }
 
-const handleTaskStatusChange = async (e: any) => {
-  const { status, id, isEditable } = e.currentTarget.dataset
+const handleTaskStatusChange = async (item: TaskItem) => {
+  const { status, id, isEditable } = item
   if (!isEditable) return
   if (status === 'COMPLETED') return
   const newStatus: keyof typeof TaskStatus = status === 'DOING' ? 'COMPLETED' : 'DOING'
@@ -236,24 +229,22 @@ const navigateToAddTask = () => {
     url: '/pages/add-task/add-task'
   })
 }
-const navigateToTaskDetail = (e: any) => {
-  const { id, status, isEditable } = e.currentTarget.dataset
+const navigateToTaskDetail = (item: TaskItem) => {
+  const { _id, isEditable } = item
   if (!isEditable) return
   uni.navigateTo({
-    url: `/pages/task-detail/task-detail?id=${id}`
+    url: `/pages/task-detail/task-detail?id=${_id}`
   })
 }
 const handleScroll = (e: any) => {
   console.log('handleScroll', e)
 }
-const onSwipeCellEditClick = (e: any) => {
-  const { id } = e.currentTarget.dataset
+const onSwipeCellEditClick = (id: string) => {
   uni.navigateTo({
     url: `/pages/add-task/add-task?id=${id}`
   })
 }
-const onSwipeCellDeleteClick = async (e: any) => {
-  const { id } = e.currentTarget.dataset
+const onSwipeCellDeleteClick = async (id: string) => {
   const confirm = await showModal()
   if (confirm) {
     await serverApi.deleteTask(id, { loading: true, loadingText: '删除中...' })
@@ -265,6 +256,9 @@ const getPageData = () => {
   getTaskList()
 }
 onMounted(() => {
+  getPageData()
+})
+onShow(() => {
   getPageData()
 })
 const debounceSearchTask = debounce(handleSearchTask, 500)
