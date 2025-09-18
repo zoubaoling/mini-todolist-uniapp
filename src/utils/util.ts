@@ -21,24 +21,24 @@ const formatNumber = (n: number) => {
 }
 export const nextTick = () => {
   return new Promise((resolve) => {
-    wx.nextTick(resolve)
+    uni.nextTick(resolve)
   })
 }
 export const setDataAndWait = (page: any, data: any): Promise<void> => {
   return new Promise((resolve) => {
     page.setData(data, () => {
-      wx.nextTick(resolve)
+      uni.nextTick(resolve)
     })
   })
 }
 export const showToast = (options: any) => {
-  wx.showToast(options)
+  uni.showToast(options)
 }
 
 export const showToastWithPromise = (options: any) => {
   return new Promise((resolve) => {
     let timer: any = null
-    wx.showToast({
+    uni.showToast({
       ...options,
       success: () => {
         if (timer) clearTimeout(timer)
@@ -48,7 +48,7 @@ export const showToastWithPromise = (options: any) => {
   })
 }
 export const getAccountInfo = () => {
-  return wx.getAccountInfoSync()
+  return uni.getAccountInfoSync()
 }
 // 小数转百分比
 export const formatToPercentage = (num: number, precision: number = 0) => {
@@ -68,7 +68,7 @@ export const apiWrapper = async <T>(
   try {
     // 根据配置决定是否显示 loading
     if (loading) {
-      wx.showLoading({
+      uni.showLoading({
         title: loadingText,
         mask: true
       });
@@ -78,7 +78,7 @@ export const apiWrapper = async <T>(
     
     // 隐藏 loading
     if (loading) {
-      wx.hideLoading();
+      uni.hideLoading();
     }
     
     return {
@@ -88,10 +88,10 @@ export const apiWrapper = async <T>(
   } catch (error) {
     // 隐藏 loading
     if (loading) {
-      wx.hideLoading();
+      uni.hideLoading();
     }
     
-    wx.showToast({
+    uni.showToast({
       title: errorMessage,
       icon: 'none',
       duration: 2000
@@ -138,7 +138,7 @@ export const showModal = ({
   cancelText = '取消'
 }: ShowModalOptions = {}) => {
   return new Promise((resolve) => {
-    wx.showModal({
+    uni.showModal({
       title,
       content,
       confirmText,
