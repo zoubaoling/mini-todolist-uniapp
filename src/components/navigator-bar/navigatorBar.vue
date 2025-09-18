@@ -25,53 +25,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-const props = defineProps({
-  title: {
-    type: String,
-    value: ''
-  },
-  subTitle: {
-    type: String,
-    value: ''
-  },
-  isShowBackButton: {
-    type: Boolean,
-    value: false
-  },
-  barType: {
-    type: String,
-    value: 'page' // page: 首页导航栏 back: 返回上一页
-  },
-  isShowRightButton: {
-    type: Boolean,
-    value: false
-  }
+import { computed, withDefaults } from 'vue' 
+const props = withDefaults(defineProps<{
+  title?: string
+  subTitle?: string
+  isShowBackButton?: boolean
+  barType?: string
+  isShowRightButton?: boolean
+}>(), {
+  title: '',
+  subTitle: '',
+  isShowBackButton: false,
+  barType: 'page', // page: 首页导航栏 back: 返回上一页
+  isShowRightButton: false
 })
-const height = ref('250rpx')
-const leftIconPath = ref('/assets/images/back.png')
-onMounted(() => {
-  updateComputedProperties(props.barType)
+const emit = defineEmits(['left-button-tap'])
+import leftIconPath from '@/static/images/back.png'
+
+const height = computed(() => {
+  const { barType = 'page' } = props
+  return barType === 'page' ? '280rpx' : '200rpx'
 })
-const updateComputedProperties = (barType: string) => {
-  switch (barType) {
-    case 'page':
-      height.value = '250rpx'
-      break
-    case 'back':
-      height.value = '140rpx'
-      break
-  }
-}
+
 const onLeftButtonTap = () => {
-  uni.$emit('left-button-tap')
+  emit('left-button-tap')
 }
-const onRightButtonTap = () => {
-  uni.$emit('right-button-tap')
-}
-watch(() => props.barType, (newVal) => {
-  updateComputedProperties(newVal)
-})
 </script>
 
 <style scoped lang="less">

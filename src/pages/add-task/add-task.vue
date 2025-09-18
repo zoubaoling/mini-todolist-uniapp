@@ -1,5 +1,5 @@
 <template>
-<scroll-view class="add-task-page">
+<view class="add-task-page">
   <navigator-bar
     title="添加任务"
     :isShowBackButton="true"
@@ -10,7 +10,7 @@
       <text>保存</text>
     </button>
   </navigator-bar>
-  <view class="add-task-page__content">
+  <scroll-view class="add-task-page__content" scroll-y>
     <!-- 基本信息 -->
     <view class="add-task-page__content-basic-info">
       <view class="add-task-page__content-basic-info-title">
@@ -132,8 +132,8 @@
       >
       <text>{{isEdit ? '编辑任务' : '创建任务'}}</text>
     </button>
-  </view>
-</scroll-view>
+  </scroll-view>
+</view>
 </template>
 
 <script setup lang="ts">
@@ -168,15 +168,19 @@ const taskFormData = reactive({
 const isEdit = ref(false)
 const editTaskId = ref('')
 const initTaskDetail = async () => {
-  if (isEdit.value) {
-    const res = await serverApi.getTaskDetail(editTaskId.value)
-    if (res.success && res.data) {
-      const { deadline } = res.data
-      Object.assign(taskFormData, {
-        deadlineDate: TimeUtils.format(deadline, 'YYYY-MM-DD'),
-        deadlineTime: TimeUtils.format(deadline, 'hh:mm')
-      })
+  try {
+    if (isEdit.value) {
+      const res = await serverApi.getTaskDetail(editTaskId.value)
+      if (res.success && res.data) {
+        const { deadline } = res.data
+        Object.assign(taskFormData, res.data, {
+          deadlineDate: TimeUtils.format(deadline, 'YYYY-MM-DD'),
+          deadlineTime: TimeUtils.format(deadline, 'hh:mm')
+        })
+      }
     }
+  } catch (error) {
+    console.error(error)
   }
 }
 const handleBack = () => {

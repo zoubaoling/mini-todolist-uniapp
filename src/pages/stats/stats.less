@@ -1,0 +1,70 @@
+.stats-page {
+  background-color: @white;
+  height: 100vh;
+  overflow: hidden;
+  .stats-content {
+    padding: @space-xl @space-2xl;
+    .stats-filters {
+      .flex-row-center;
+      height: 110rpx;
+      box-sizing: border-box;
+      gap: @space-md;
+      margin-bottom: @space-2xl;
+      padding: @space-md @space-lg;
+      &-item {
+        flex: 1;
+        .flex-row-center;
+        height: 100%;
+        border-radius: @radius-2xl;
+        &-label {
+          color: @text-primary;
+        }
+      }
+      .active {
+          background-color: @primary-color;
+          .stats-filters-item-label {
+          color: @white;
+        }
+      }
+    }
+    .stats-overview {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: @space-xl;
+      margin-bottom: @space-2xl;
+      .stats-overview-item {
+        .flex-column-center;
+        &-label {
+          font-size: @font-2xl;
+          font-weight: 600;
+        }
+        &-value {
+          margin-top: @space-md;
+          color: @text-primary;
+        }
+      }
+    }
+    .stats-category {
+      &-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: @space-xl;
+        .stats-category-icon {
+          width: 32rpx;
+          height: 32rpx;
+          margin-right: @space-md;
+        }
+        .stats-category-title {
+          font-size: @font-lg;
+          font-weight: 600;
+          color: @text-primary;
+        }
+      }
+      &-content {
+        .stats-category-progress {
+          margin-bottom: @space-md;
+        }
+      }
+    }
+  }
+}

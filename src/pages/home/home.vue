@@ -133,7 +133,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { onShow } from '@dcloudio/uni-app'
-import NavigatorBar from '@/components/navigator-bar/navigatorBar.vue';
 import { TASK_CATEGORY, TASK_MAPS,  } from '../../constants/index'
 import { TaskStatus, TaskPriority, TaskItem } from '../../types/index'
 import { debounce, formatToPercentage, showModal } from '../../utils/util'
@@ -188,7 +187,6 @@ const getTaskList = async (params?: any) => {
       taskList.splice(0, taskList.length)
     }
   } catch (error) {
-    console.error('获取任务列表失败:', error)
     // 出错时显示空列表
     taskList.splice(0, taskList.length)
   }
@@ -237,7 +235,6 @@ const navigateToTaskDetail = (item: TaskItem) => {
   })
 }
 const handleScroll = (e: any) => {
-  console.log('handleScroll', e)
 }
 const onSwipeCellEditClick = (id: string) => {
   uni.navigateTo({
@@ -254,6 +251,7 @@ const onSwipeCellDeleteClick = async (id: string) => {
 const getPageData = () => {
   getOverviewData()
   getTaskList()
+
 }
 onMounted(() => {
   getPageData()

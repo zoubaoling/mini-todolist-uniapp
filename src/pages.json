@@ -28,6 +28,9 @@
 		},
 		{
 			"path": "pages/add-task/add-task"
+		},
+		{
+			"path": "pages/task-detail/task-detail"
 		}
 	],
 	"globalStyle": {
@@ -38,21 +41,28 @@
 		}
 	},
 	"tabBar": {
-		"color": "#999",
-		"selectedColor": "#000",
-		"backgroundColor": "#F8F8F8",
+		"backgroundColor": "#fff",
+    "borderStyle": "black",
+    "color": "#666666",
+    "selectedColor": "#667eea",
 		"list": [
 			{
 				"text": "首页",
-				"pagePath": "pages/home/home"
+				"pagePath": "pages/home/home",
+				"iconPath": "static/images/home.png",
+        "selectedIconPath": "static/images/home-active.png"
 			},
 			{
 				"text": "统计",
-				"pagePath": "pages/stats/stats"
+				"pagePath": "pages/stats/stats",
+				"iconPath": "static/images/stats.png",
+        "selectedIconPath": "static/images/stats-active.png"
 			},
 			{
 				"text": "我的",
-				"pagePath": "pages/profile/profile"
+				"pagePath": "pages/profile/profile",
+				"iconPath": "static/images/profile.png",
+        "selectedIconPath": "static/images/profile-active.png"
 			}
 		]
 	}

@@ -2,6 +2,10 @@
   "extends": "@vue/tsconfig/tsconfig.json",
   "compilerOptions": {
     "sourceMap": true,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "declaration": false,
+    "declarationMap": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

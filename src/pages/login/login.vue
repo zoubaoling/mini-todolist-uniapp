@@ -26,7 +26,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import NavigatorBar from '@/components/navigator-bar/navigatorBar.vue';
 import { userLogin } from '../../server/index';
 
 const toastRef = ref('')

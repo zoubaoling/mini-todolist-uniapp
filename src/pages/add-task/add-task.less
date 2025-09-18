@@ -1,12 +1,17 @@
 .add-task-page {
   position: relative;
   background-color: @white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   .card-box-title {
     font-size: @font-xl;
     font-weight: 500;
   }
   &__content {
+    flex: 1;
     padding: @space-lg @space-lg @space-3xl;
+    overflow: hidden;
     &-basic-info {
       .card-box;
       &-title {
