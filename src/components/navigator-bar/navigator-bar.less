@@ -5,11 +5,13 @@
   color: @white;
   padding: @space-lg @space-lg;
   position: relative;
+  padding-top: calc(var(--status-bar-height) + @space-lg);
+  // env(safe-area-inset-top)和@space-lg单位不一致，需要转换
+  // padding-top: calc(env(safe-area-inset-top) + @space-lg);
   .navigator-bar__button {
     position: absolute;
     left: @space-lg;
-    top: 50%;
-    transform: translateY(-50%);
+    top: var(--status-bar-height / 2);
     border: none;
     width: @button-size-lg;
     height: 100%;
@@ -32,27 +34,4 @@
       font-size: @font-sm;
     }
   }
-  .navigator-bar__button-right {
-    position: absolute;
-    right: @space-lg;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    width: @button-size-lg;
-    height: @button-size-lg;
-    margin: 0;  
-  }
-
-}
-.navigator-bar__button_right {
-  position: absolute;
-  right: @space-lg;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  width: @button-size-lg;
-  height: @button-size-lg;
-  margin: 0;  
-  background-color: purple !important;
-  background-color: red !important;
 }

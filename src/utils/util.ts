@@ -179,3 +179,7 @@ export const extractUserInfoFromStorage = (storageData: any) => {
   
   return null
 }
+export const px2rpx = (px: number) => {
+  const systemInfo = uni.getSystemInfoSync()
+  return px * (750 / systemInfo.windowWidth)
+}

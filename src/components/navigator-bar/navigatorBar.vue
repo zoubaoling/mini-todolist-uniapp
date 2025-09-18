@@ -26,6 +26,7 @@
 
 <script setup lang="ts">
 import { computed, withDefaults } from 'vue' 
+import { px2rpx } from '@/utils/util'
 const props = withDefaults(defineProps<{
   title?: string
   subTitle?: string
@@ -42,11 +43,27 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits(['left-button-tap'])
 import leftIconPath from '@/static/images/back.png'
 
+const isIphoneX = () => {
+  // 安全区域信息（只有刘海屏设备有）safeArea safeAreaInsets
+  // 刘海屏高度 = 状态栏高度 - 安全区域顶部
+  const info = uni.getSystemInfoSync()
+  const safeArea = info.safeArea || {}
+  const safeAreaBottom = info.safeAreaInsets?.bottom || 0
+  const windowBottom = info.screenHeight - (safeArea.bottom || 0)
+  // 判断是否有安全区底部留白（iPhone X 及以上机型有）
+  return safeAreaBottom > 0 || windowBottom > 0
+}
+const getSafeAreaTopHeight = () => {
+  const { statusBarHeight } = uni.getSystemInfoSync()
+  // return isIphoneX() ? px2rpx(statusBarHeight) : 0
+  return px2rpx(statusBarHeight)
+}
+const statusBarHeight = getSafeAreaTopHeight()
 const height = computed(() => {
   const { barType = 'page' } = props
-  return barType === 'page' ? '280rpx' : '200rpx'
+  const baseHeight = barType === 'page' ? 280 : 200
+  return `${baseHeight + statusBarHeight}` + 'rpx'
 })
-
 const onLeftButtonTap = () => {
   emit('left-button-tap')
 }
