@@ -1,4 +1,4 @@
-import { ApiResponse, ShowModalOptions } from "../types"
+import { ApiResponse, ShowModalOptions, UserInfo } from "../types"
 
 export const formatTime = (date: Date) => {
   const year = date.getFullYear()
@@ -19,19 +19,44 @@ const formatNumber = (n: number) => {
   const s = n.toString()
   return s[1] ? s : '0' + s
 }
-export const nextTick = () => {
+export const nextTick = (): Promise<void> => {
   return new Promise((resolve) => {
+    // @ts-ignore - uni-app 类型定义问题
     uni.nextTick(resolve)
   })
 }
+
 export const setDataAndWait = (page: any, data: any): Promise<void> => {
   return new Promise((resolve) => {
     page.setData(data, () => {
+      // @ts-ignore - uni-app 类型定义问题
       uni.nextTick(resolve)
     })
   })
 }
-export const showToast = (options: any) => {
+// 使用联合类型和字面量类型
+export type ToastIcon = 'success' | 'error' | 'loading' | 'none'
+export type ToastPosition = 'top' | 'center' | 'bottom'
+
+export interface ToastOptions {
+  title: string
+  icon?: ToastIcon
+  duration?: number
+  position?: ToastPosition
+  mask?: boolean
+}
+
+// 使用函数重载
+export function showToast(options: ToastOptions): void
+export function showToast(title: string, icon?: ToastIcon): void
+export function showToast(
+  optionsOrTitle: ToastOptions | string,
+  icon: ToastIcon = 'none'
+): void {
+  const options = typeof optionsOrTitle === 'string' 
+    ? { title: optionsOrTitle, icon }
+    : optionsOrTitle
+    
   uni.showToast(options)
 }
 
@@ -103,29 +128,37 @@ export const apiWrapper = async <T>(
     };
   }
 };
-// 防抖
-export const debounce = (fun: Function, delay: number) => {
-  let timeoutId: any
-  return (...args: any[]) => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => {
-      fun(...args)
-    }, delay)
+// 使用泛型和函数重载
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: number | null = null
+  
+  return (...args: Parameters<T>) => {
+    if (timeoutId) clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func(...args), delay)
   }
 }
-// 节流 定时器 + 时间戳
-export const throttle = (fun: Function, delay: number) => {
+
+// 使用更严格的类型
+export const throttle = <T extends (...args: any[]) => any>(
+  func: T,
+  delay: number
+): ((...args: Parameters<T>) => void) => {
   let lastTime = 0
-  let timeoutId: any
-  return (...args: any[]) => {
+  let timeoutId: number | null = null
+  
+  return (...args: Parameters<T>) => {
     const now = Date.now()
     if (now - lastTime >= delay) {
-      fun(...args)
+      func(...args)
       lastTime = now
     } else {
-      clearTimeout(timeoutId)
+      if (timeoutId) clearTimeout(timeoutId)
       timeoutId = setTimeout(() => {
-        fun(...args)
+        func(...args)
+        lastTime = Date.now()
       }, delay)
     }
   }
@@ -136,15 +169,16 @@ export const showModal = ({
   confirmText = '删除',
   confirmColor = '#FF4D4F',
   cancelText = '取消'
-}: ShowModalOptions = {}) => {
+}: ShowModalOptions = {}): Promise<boolean> => {
   return new Promise((resolve) => {
-    uni.showModal({
+    // @ts-ignore - 微信小程序 API
+    wx.showModal({
       title,
       content,
       confirmText,
       confirmColor,
       cancelText,
-      success: (res) => {
+      success: (res: any) => {
         resolve(res.confirm)
       }
     })
@@ -162,19 +196,28 @@ export const getDefaultUserStats = () => ({
 
 export const getDefaultUserInfo = () => ({})
 
-export const isUserLoggedIn = (userInfo: any) => {
-  return userInfo && userInfo.openid
+// 使用类型守卫
+export const isUserLoggedIn = (userInfo: unknown): userInfo is UserInfo => {
+  return (
+    typeof userInfo === 'object' &&
+    userInfo !== null &&
+    'openid' in userInfo &&
+    typeof (userInfo as any).openid === 'string'
+  )
 }
 
-export const extractUserInfoFromStorage = (storageData: any) => {
-  if (!storageData) return null
+// 使用映射类型和工具类型
+export const extractUserInfoFromStorage = (storageData: unknown): UserInfo | null => {
+  if (!storageData || typeof storageData !== 'object') return null
   
-  if (storageData.userInfo) {
-    // 数据结构: { userInfo: {...}, isNewUser: boolean }
-    return storageData.userInfo
-  } else if (storageData.openid) {
-    // 数据结构: { openid: string, ... }
-    return storageData
+  const data = storageData as Record<string, any>
+  
+  if (data.userInfo && typeof data.userInfo === 'object') {
+    return data.userInfo as UserInfo
+  }
+  
+  if (typeof data.openid === 'string') {
+    return data as UserInfo
   }
   
   return null

@@ -158,7 +158,7 @@ const getOverviewData = async () => {
     }
 }
 
-const getTaskList = async (params?: any) => {
+const getTaskList = async (params?: any = { category: 'ALL' }) => {
   try {
     const res = await serverApi.getTaskList(params)
     if (res.success && res.data) {

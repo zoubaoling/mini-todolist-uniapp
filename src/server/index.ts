@@ -1,4 +1,14 @@
-import { TaskItem, TaskListParams, TaskStatus, DateType, ApiResponse, ServerApiConfigOptions, UserInfo } from '../types/index'
+import type { 
+  TaskItem, 
+  TaskListParams, 
+  TaskStatus, 
+  DateType, 
+  ApiResponse, 
+  ServerApiConfigOptions, 
+  UserInfo,
+  TaskListResponse,
+  TaskOverview
+} from '../types/index'
 
 import { apiWrapper } from '../utils/util'
 /**
@@ -14,38 +24,34 @@ import { apiWrapper } from '../utils/util'
 export const getTaskOverview = async (
   dateType: DateType = 'ALL',
   options: ServerApiConfigOptions = {}
-): Promise<ApiResponse<any>> => {
+): Promise<ApiResponse<TaskOverview>> => {
   return apiWrapper(async () => {
     const res = await wx.cloud.callFunction({
       name: 'todoList_taskList',
       data: {
         action: 'overview',
-        data: {
-          dateType
-        }
+        data: { dateType }
       }
-    });
-    return res.result;
-  }, options);
-};
+    })
+    return res.result
+  }, options)
+}
 // 获取用户任务列表-所有；按类型分类；按名称搜索分类
 export const getTaskList = async (
   params: TaskListParams,
   options: ServerApiConfigOptions = {}
-): Promise<ApiResponse<any>> => {
+): Promise<ApiResponse<TaskListResponse['data']>> => {
   return apiWrapper(async () => {
     const res = await wx.cloud.callFunction({
       name: 'todoList_taskList',
       data: {
         action: 'list',
-        data: {
-          ...params
-        }
+        data: params
       }
-    });
-    return res.result;
-  }, options);
-};
+    })
+    return res.result
+  }, options)
+}
 // 获取任务详情
 export const getTaskDetail = async (
   id: string,
@@ -66,22 +72,20 @@ export const getTaskDetail = async (
 };
 // 添加任务
 export const addTask = async (
-  params: TaskItem,
+  params: Omit<TaskItem, '_id' | 'createTime'>,
   options: ServerApiConfigOptions = { loading: true, loadingText: '保存中...' }
-): Promise<ApiResponse<any>> => {
+): Promise<ApiResponse<TaskItem>> => {
   return apiWrapper(async () => {
     const res = await wx.cloud.callFunction({
       name: 'todoList_taskList',
       data: {
         action: 'add',
-        data: {
-          ...params
-        }
+        data: params
       }
-    });
-    return res.result;
-  }, options);
-};
+    })
+    return res.result
+  }, options)
+}
 // 编辑任务
 export const editTask = async (
   params: TaskItem,

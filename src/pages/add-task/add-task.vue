@@ -127,7 +127,6 @@
     <!-- 创建任务 -->
     <button
       class="add-task-page__content-create button"
-      type="primary"
       @click="handleSaveTask"
       >
       <text>{{isEdit ? '编辑任务' : '创建任务'}}</text>
@@ -142,81 +141,120 @@ import { debounce, showToastWithPromise } from "../../utils/util"
 import TimeUtils from "../../utils/timer"
 import * as serverApi from '../../server/index'
 import { onLoad } from '@dcloudio/uni-app'
-import { ref, computed, reactive } from 'vue'
-const priorityList = computed(() => {
-  return Object.values(TASK_PRIORITY).map(({type, label, desc}) => ({
-    type,
+import { ref, computed, reactive, type Ref, type ComputedRef } from 'vue'
+import type { TaskFormData, TaskCategoryType, TaskPriorityType } from '../../types/index'
+
+// 使用更严格的类型定义
+interface PriorityItem {
+  readonly type: TaskPriorityType
+  readonly label: string
+  readonly desc: string
+  readonly class: string
+  readonly selectedClass: string
+}
+
+interface CategoryItem {
+  readonly type: TaskCategoryType
+  readonly label: string
+  readonly color: string
+  readonly gradient: string
+}
+
+// 使用计算属性的类型注解
+const priorityList: ComputedRef<PriorityItem[]> = computed(() => {
+  return Object.values(TASK_PRIORITY).map(({ type, label, desc }): PriorityItem => ({
+    type: type as TaskPriorityType,
     desc,
     label: `${label}优先级`,
     class: `priority-${type.toLowerCase()}`,
     selectedClass: `priority-${type.toLowerCase()}-selected`
   }))
 })
-const categoryList = Object.values(TASK_CATEGORY)
-const taskFormData = reactive({
+
+const categoryList: readonly CategoryItem[] = Object.values(TASK_CATEGORY) as CategoryItem[]
+
+// 使用类型断言和默认值
+const taskFormData = reactive<TaskFormData>({
   text: '',
   desc: '',
-  category: 'WORK',
+  category: 'WORK' as TaskCategoryType,
   isReminder: false,
-  // picker: mode=time时，格式为 "YYYY-MM-DD"
   deadlineDate: TimeUtils.format(new Date(), 'YYYY-MM-DD'),
-  // picker: mode=time时，格式为 hh:mm
   deadlineTime: TimeUtils.format(new Date(), 'hh:mm'),
-  priority: 'HIGH',
-  status: 'DOING'
+  priority: 'HIGH' as TaskPriorityType,
+  status: 'DOING' as const
 })
-const isEdit = ref(false)
-const editTaskId = ref('')
-const initTaskDetail = async () => {
+
+const isEdit: Ref<boolean> = ref(false)
+const editTaskId: Ref<string> = ref('')
+// 使用 async/await 和错误处理
+const initTaskDetail = async (): Promise<void> => {
+  if (!isEdit.value || !editTaskId.value) return
+  
   try {
-    if (isEdit.value) {
-      const res = await serverApi.getTaskDetail(editTaskId.value)
-      if (res.success && res.data) {
-        const { deadline } = res.data
-        Object.assign(taskFormData, res.data, {
-          deadlineDate: TimeUtils.format(deadline, 'YYYY-MM-DD'),
-          deadlineTime: TimeUtils.format(deadline, 'hh:mm')
-        })
-      }
+    const res = await serverApi.getTaskDetail(editTaskId.value)
+    if (res.success && res.data) {
+      const { deadline, ...restData } = res.data
+      Object.assign(taskFormData, restData, {
+        deadlineDate: TimeUtils.format(deadline, 'YYYY-MM-DD'),
+        deadlineTime: TimeUtils.format(deadline, 'hh:mm')
+      })
     }
   } catch (error) {
-    console.error(error)
+    console.error('Failed to load task detail:', error)
   }
 }
-const handleBack = () => {
+
+const handleBack = (): void => {
   uni.navigateBack()
 }
-const updateFormFieldData = (e: any, field, value) => {
+
+// 使用函数重载和类型守卫
+const updateFormFieldData = (
+  e: Event, 
+  field: keyof TaskFormData, 
+  value?: string
+): void => {
   const isFormField = ['text', 'desc', 'isReminder', 'deadlineDate', 'deadlineTime'].includes(field)
-  taskFormData[field] = isFormField ? e.detail.value : value
-}
-const handleSaveTask = async () => {
-  const { deadlineTime, deadlineDate, ...restFormData } = taskFormData
-  const deadline = TimeUtils.combineDateTimeSafe(deadlineDate, deadlineTime)
-  const saveFunc = isEdit.value ? serverApi.editTask : serverApi.addTask
-  await saveFunc({
-    ...restFormData,
-    deadline
-  })
-  await showToastWithPromise({
-    title: '保存成功',
-    icon: 'success',
-    duration: 1500
-  })
-  if (isEdit.value) {
-    uni.switchTab({
-      url: '/pages/home/home'
-    })
-  } else {
-    uni.navigateBack()
+  const newValue = isFormField ? (e as any).detail.value : value
+  
+  if (newValue !== undefined) {
+    (taskFormData as any)[field] = newValue
   }
 }
-const debounceUpdateFormFieldData = debounce(updateFormFieldData.bind(this), 500)
 
-onLoad((options) => {
-  const { id } = options
-  isEdit.value = !!id
-  editTaskId.value = id
+// 使用 async/await 和错误处理
+const handleSaveTask = async (): Promise<void> => {
+  try {
+    const { deadlineTime, deadlineDate, ...restFormData } = taskFormData
+    const deadline = TimeUtils.combineDateTimeSafe(deadlineDate, deadlineTime)
+    
+    const saveFunc = isEdit.value ? serverApi.editTask : serverApi.addTask
+    await saveFunc({ ...restFormData, deadline: new Date(deadline) } as any)
+    
+    await showToastWithPromise({
+      title: '保存成功',
+      icon: 'success',
+      duration: 1500
+    })
+    
+    if (isEdit.value) {
+      uni.switchTab({ url: '/pages/home/home' })
+    } else {
+      uni.navigateBack()
+    }
+  } catch (error) {
+    console.error('Failed to save task:', error)
+  }
+}
+
+// 使用 debounce 的类型安全版本
+const debounceUpdateFormFieldData = debounce(updateFormFieldData, 500)
+
+onLoad((options?: Record<string, any>) => {
+  const { id } = options || {}
+  isEdit.value = Boolean(id)
+  editTaskId.value = id || ''
   initTaskDetail()
 })
 </script>
